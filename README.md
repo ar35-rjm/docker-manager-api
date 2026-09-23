@@ -8,6 +8,8 @@
 
  ## Requirements
 
+ - Java 21
+ - Maven project manager
  - Docker Engine or Docker Desktop
  - Docker CLI available on your `PATH`
  - Permission to access the Docker daemon
@@ -23,7 +25,11 @@
 
  2. Start Docker Engine or Docker Desktop.
 
- 3. Follow the project’s available run or build instructions to launch Docker Manager.
+ 3. Run the Docker Manager:
+
+	```bash
+	 mvn spring-boot:run
+	```
 
  ## Usage
 
@@ -37,7 +43,7 @@
 
  ## API endpoints
 
- Replace `http://localhost:3000` with the address where Docker Manager is running.
+ Replace `http://localhost:8080` with the address where Docker Manager is running.
 
  | Method | Endpoint | Usage |
  | --- | --- | --- |
