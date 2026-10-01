@@ -13,7 +13,7 @@ import com.rogerjosemaria.docker_manager.services.DockerService;
 import lombok.AllArgsConstructor;
 
 @RestController 
-@RequestMapping("/api/container")
+@RequestMapping("/api/v1/container")
 @AllArgsConstructor 
 public class DockerContainerController {
 

@@ -13,7 +13,7 @@ import com.rogerjosemaria.docker_manager.services.DockerService;
 import lombok.AllArgsConstructor;
 
 @RestController 
-@RequestMapping("/api/images")
+@RequestMapping("/api/v1/images")
 @AllArgsConstructor 
 public class DockerImageController {
 
