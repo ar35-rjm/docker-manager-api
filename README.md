@@ -25,10 +25,11 @@
 
  2. Start Docker Engine or Docker Desktop.
 
- 3. Run the Docker Manager:
+ 3. Run the Docker Manager API:
 
 	```bash
-	 mvn spring-boot:run
+	cd backend
+    mvn spring-boot:run
 	```
 
  ## Usage
@@ -47,11 +48,11 @@
 
  | Method | Endpoint | Usage |
  | --- | --- | --- |
- | `GET` | `/api/containers` | List containers |
- | `GET` | `/api/containers/:id` | View a container |
- | `POST` | `/api/containers/:id/start` | Start a container |
- | `POST` | `/api/containers/:id/stop` | Stop a container |
- | `DELETE` | `/api/containers/:id` | Remove a container |
+ | `GET` | `/api/v1/containers` | List containers |
+ | `GET` | `/api/v1/containers/:id` | View a container |
+ | `POST` | `/api/v1/containers/:id/start` | Start a container |
+ | `POST` | `/api/v1/containers/:id/stop` | Stop a container |
+ | `DELETE` | `/api/v1/containers/:id` | Remove a container |
  | `GET` | `/api/images` | List images |
  | `GET` | `/api/networks` | List networks |
  | `GET` | `/api/volumes` | List volumes |
@@ -59,10 +60,10 @@
  Example requests:
 
  ```bash
- curl http://localhost:3000/api/containers
- curl -X POST http://localhost:3000/api/containers/<container-id>/start
- curl -X POST http://localhost:3000/api/containers/<container-id>/stop
- curl -X DELETE http://localhost:3000/api/containers/<container-id>
+ curl http://localhost:3000/api/v1/containers
+ curl -X POST http://localhost:3000/api/v1/containers/<container-id>/start
+ curl -X POST http://localhost:3000/api/v1/containers/<container-id>/stop
+ curl -X DELETE http://localhost:3000/api/v1/containers/<container-id>
  ```
 
  ## Development
