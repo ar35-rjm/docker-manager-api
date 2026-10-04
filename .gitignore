@@ -1,4 +1,4 @@
-HELP.md
+backend/HELP.md
 target/
 .mvn/wrapper/maven-wrapper.jar
 !**/src/main/**/target/
@@ -30,4 +30,4 @@ build/
 !**/src/test/**/build/
 
 ### VS Code ###
-.vscode/
+../.vscode/
