@@ -11,24 +11,16 @@ import com.github.dockerjava.api.model.Image;
 import lombok.AllArgsConstructor;
 
 
-@Service 
-@AllArgsConstructor 
-public class DockerService {
+@Service
+@AllArgsConstructor
+public class DockerContainerService {
 
     private final DockerClient dockerClient;
 
     public List<Container> listContainers(Boolean listAll){
         return dockerClient.listContainersCmd()
-            .withShowAll(listAll)
-            .exec();
-    }
-
-    public List<Image> listImages(){
-        return dockerClient.listImagesCmd().exec();
-    }
-
-    public List<Image> filterImages(String imageName){
-        return dockerClient.listImagesCmd().withImageNameFilter(imageName).exec();
+                .withShowAll(listAll)
+                .exec();
     }
 
     public void startContainer(String id){
@@ -43,8 +35,8 @@ public class DockerService {
         dockerClient.removeContainerCmd(id).exec();
     }
 
-
     public void createContainer(String imageName){
         dockerClient.createContainerCmd(imageName).exec();
     }
+
 }

@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.github.dockerjava.api.model.Container;
-import com.rogerjosemaria.docker_manager.services.DockerService;
+import com.rogerjosemaria.docker_manager.services.DockerContainerService;
 
 import lombok.AllArgsConstructor;
 
@@ -17,32 +17,32 @@ import lombok.AllArgsConstructor;
 @AllArgsConstructor 
 public class DockerContainerController {
 
-    private final DockerService dockerService;
+    private final DockerContainerService dockerContainerService;
 
     @GetMapping("")
     public List<Container> listContainers(Boolean value){
         Boolean all = value!=null ? value : true;
-        return dockerService.listContainers(all);
+        return dockerContainerService.listContainers(all);
     }
 
     @PostMapping("")
     public void createContainer(String imageName){
-        dockerService.createContainer(imageName);
+        dockerContainerService.createContainer(imageName);
     }
     
     @PostMapping("/{id}/start")
     public void startContainer(String id){
-        dockerService.startContainer(id);
+        dockerContainerService.startContainer(id);
     }
     
     @PostMapping("/{id}/stop")
     public void stopContainer(String id){
-        dockerService.stopContainer(id);
+        dockerContainerService.stopContainer(id);
     }
     
     @PostMapping("/{id}")
     public void deleteContainer(String id){
-        dockerService.deleteContainer(id);
+        dockerContainerService.deleteContainer(id);
     }
     
 }
