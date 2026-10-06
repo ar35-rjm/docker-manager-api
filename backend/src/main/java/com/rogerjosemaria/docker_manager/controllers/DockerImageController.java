@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.github.dockerjava.api.model.Image;
-import com.rogerjosemaria.docker_manager.services.DockerImageService;
+import com.rogerjosemaria.docker_manager.services.DockerService;
 
 import lombok.AllArgsConstructor;
 
@@ -17,16 +17,16 @@ import lombok.AllArgsConstructor;
 @AllArgsConstructor 
 public class DockerImageController {
 
-    private final DockerImageService dockerImageService;
+    private final DockerService dockerService;
 
     @GetMapping("")
     public List<Image> listImages(){
-        return dockerImageService.listImages();
+        return dockerService.listImages();
     }
 
     @GetMapping("/filter")
     public List<Image> listImages(@RequestParam(required = false, defaultValue = "image-") String imageName){
-        return dockerImageService.filterImages(imageName);
+        return dockerService.filterImages(imageName);
     }
 
     // @GetMapping("/search")
