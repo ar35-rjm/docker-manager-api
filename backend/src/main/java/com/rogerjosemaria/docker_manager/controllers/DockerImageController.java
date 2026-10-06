@@ -29,4 +29,24 @@ public class DockerImageController {
         return dockerImageService.filterImages(imageName);
     }
 
+    // @GetMapping("/search")
+    // public List<Image> searchImages(@RequestParam(required = false, defaultValue = "image-") String imageName){
+    //     return dockerImageService.searchImages(imageName);
+    // }
+
+    // @GetMapping("/pull")
+    // public void pullNewImage(@RequestParam(required = false, defaultValue = "image-") String imageName){
+    //     dockerImageService.pullNewImage(imageName);
+    // }
+
+    // @GetMapping("/remove")
+    // public void removeImage(@RequestParam(required = false, defaultValue = "image-") String imageId){
+    //     dockerImageService.removeImage(imageId);
+    // }
+
+    // @GetMapping("/containers")
+    // public List<Container> listContainersUsingImage(@RequestParam(required = false, defaultValue = "image-") String imageId){
+    //     return dockerImageService.listContainersUsingImage(imageId);
+    // }
+
 }
