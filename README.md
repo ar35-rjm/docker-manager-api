@@ -1,81 +1,181 @@
- # Docker Manager
+# Docker Manager
 
- A lightweight project for managing Docker resources from a single place.
+A lightweight project for managing Docker resources from a single place.
 
- ## Overview
+## Overview
 
- Docker Manager is intended to simplify common Docker workflows, such as viewing and managing containers, images, networks, and volumes. It provides a convenient foundation for working with Docker without repeatedly typing low-level commands.
+Docker Manager is a Spring Boot REST API that talks to the Docker daemon directly (no `docker` CLI required by the API itself). It currently supports:
 
- ## Requirements
+- Listing running and stopped containers
+- Creating containers from an image
+- Starting, stopping, and removing containers
+- Listing, filtering, and searching images
+- Pulling images asynchronously with progress tracking
+- Removing images and listing containers that use a given image
 
- - Java 21
- - Maven project manager
- - Docker Engine or Docker Desktop
- - Docker CLI available on your `PATH`
- - Permission to access the Docker daemon
+## Requirements
 
- ## Getting started
+- Java 21
+- Maven
+- Docker Engine or Docker Desktop
+- Permission to access the Docker daemon (the API connects over the Docker socket, `unix:///var/run/docker.sock` by default)
 
- 1. Clone the repository:
+## Getting started
 
-	 ```bash
-	 git clone https://github.com/ar35-rjm/docker-manager-api.git
-	 cd docker-manager
-	 ```
+1. Clone the repository:
 
- 2. Start Docker Engine or Docker Desktop.
+    ```bash
+    git clone https://github.com/ar35-rjm/docker-manager-api.git
+    cd docker-manager-api
+    ```
 
- 3. Run the Docker Manager API:
+2. Start Docker Engine or Docker Desktop.
 
-	```bash
-	cd backend
+3. Run the Docker Manager API:
+
+    ```bash
+    cd backend
     mvn spring-boot:run
-	```
+    ```
 
- ## Usage
+### Configuration
 
- Use Docker Manager to inspect and manage Docker resources. Typical workflows include:
+Useful properties in `backend/src/main/resources/application.properties`:
 
- - Listing running and stopped containers
- - Starting, stopping, and removing containers
- - Viewing and cleaning up images
- - Managing Docker networks and volumes
- - Monitoring resource usage and container status
+```properties
+spring.application.name=docker-manager
+# Docker daemon address (Linux/macOS unix socket shown; on Windows use
+# npipe:////./pipe/docker_engine)
+docker.socket.path=unix:///var/run/docker.sock
+```
 
- ## API endpoints
+## Usage
 
- Replace `http://localhost:8080` with the address where Docker Manager is running.
+Typical workflows include:
 
- | Method | Endpoint | Usage |
- | --- | --- | --- |
- | `GET` | `/api/v1/containers` | List containers |
- | `GET` | `/api/v1/containers/:id` | View a container |
- | `POST` | `/api/v1/containers/:id/start` | Start a container |
- | `POST` | `/api/v1/containers/:id/stop` | Stop a container |
- | `DELETE` | `/api/v1/containers/:id` | Remove a container |
- | `GET` | `/api/images` | List images |
- | `GET` | `/api/networks` | List networks |
- | `GET` | `/api/volumes` | List volumes |
+- Inspecting all containers (`?all=true`) or only running ones (`?all=false`)
+- Pulling an image in the background and polling its status until complete
+- Removing an image, with an optional `force` flag for images still in use
+- Searching Docker Hub for images before pulling them
 
- Example requests:
+## API endpoints
 
- ```bash
- curl http://localhost:3000/api/v1/containers
- curl -X POST http://localhost:3000/api/v1/containers/<container-id>/start
- curl -X POST http://localhost:3000/api/v1/containers/<container-id>/stop
- curl -X DELETE http://localhost:3000/api/v1/containers/<container-id>
- ```
+The API listens on `http://localhost:8080` by default. The base path is `/api/v1`.
 
- ## Development
+### Containers
 
- Contributions are welcome. Create a branch for your changes, keep updates focused, and verify Docker-related behavior locally before opening a pull request.
+| Method | Endpoint | Usage |
+| --- | --- | --- |
+| `GET` | `/api/v1/container?all=true` | List containers (`all=false` for running only) |
+| `POST` | `/api/v1/container?imageName=<image>` | Create a container from an image |
+| `POST` | `/api/v1/container/{id}/start` | Start a container |
+| `POST` | `/api/v1/container/{id}/stop` | Stop a container |
+| `POST` | `/api/v1/container/{id}` | Remove a container |
 
- ## Troubleshooting
+### Images
 
- - Confirm that Docker is running with `docker info`.
- - Check that your user can access the Docker socket.
- - Review container output with `docker logs <container>`.
+| Method | Endpoint | Usage |
+| --- | --- | --- |
+| `GET` | `/api/v1/images` | List local images |
+| `GET` | `/api/v1/images/filter?imageName=<name>` | Filter local images by name |
+| `GET` | `/api/v1/images/search?term=<term>` | Search Docker Hub |
+| `POST` | `/api/v1/images/pull?repository=<repo>&tag=<tag>` | Start an image pull (returns `202 Accepted` immediately) |
+| `GET` | `/api/v1/images/pull-status?repository=<repo>&tag=<tag>` | Poll pull progress (`PULLING`, `COMPLETED`, `FAILED`) |
+| `DELETE` | `/api/v1/images/{id}?force=false` | Remove an image (`force=true` to override images in use) |
+| `GET` | `/api/v1/images/{id}/containers` | List containers created from an image |
 
- ## License
+### Examples
 
- No license has been specified yet.
+List containers:
+
+```bash
+curl http://localhost:8080/api/v1/container?all=true
+```
+
+Pull `alpine:3.20` in the background:
+
+```bash
+curl -X POST "http://localhost:8080/api/v1/images/pull?repository=alpine&tag=3.20"
+```
+
+Poll the pull status:
+
+```bash
+curl "http://localhost:8080/api/v1/images/pull-status?repository=alpine&tag=3.20"
+```
+
+Example response:
+
+```json
+{
+  "repository": "alpine",
+  "tag": "3.20",
+  "startedAt": "2026-10-20T10:15:30Z",
+  "state": "COMPLETED",
+  "layersDone": 3,
+  "layersTotal": 3,
+  "lastMessage": "Downloaded newer image",
+  "error": null,
+  "finishedAt": "2026-10-20T10:15:35Z"
+}
+```
+
+Container lifecycle:
+
+```bash
+curl -X POST http://localhost:8080/api/v1/container/<container-id>/start
+curl -X POST http://localhost:8080/api/v1/container/<container-id>/stop
+curl -X POST http://localhost:8080/api/v1/container/<container-id>
+```
+
+### Error responses
+
+Docker daemon errors are mapped to meaningful HTTP status codes by a global exception handler:
+
+| Status | Cause |
+| --- | --- |
+| `400` | Invalid request input |
+| `404` | Container/image not found, or no pull recorded for that image |
+| `409` | Conflict, e.g. removing an image still used by a container |
+| `500` | Any other Docker daemon error |
+
+```json
+{
+  "status": 409,
+  "error": "Conflict",
+  "message": "..."
+}
+```
+
+## Project structure
+
+```
+backend/src/main/java/com/rogerjosemaria/docker_manager/
+├── config/          # Docker client and pull executor beans
+├── controllers/     # REST controllers and exception handling
+├── models/          # API models (e.g. PullStatus)
+└── services/        # Docker container and image services
+```
+
+## Development
+
+Contributions are welcome. Create a branch for your changes, keep updates focused, and verify Docker-related behavior locally before opening a pull request.
+
+Build and test:
+
+```bash
+cd backend
+mvn test
+mvn package
+```
+
+## Troubleshooting
+
+- Confirm the daemon is reachable with `docker info`.
+- Check that your user can access the Docker socket (e.g. add your user to the `docker` group on Linux).
+- On Windows, set `docker.socket.path=npipe:////./pipe/docker_engine`.
+- Review the API logs and, for container-specific issues, `docker logs <container>`.
+
+## License
+
+No license has been specified yet.
