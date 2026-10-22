@@ -1,6 +1,9 @@
 package com.rogerjosemaria.docker_manager.config;
 
 import java.time.Duration;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -44,4 +47,21 @@ public class DockerClientConfig {
         // Pass built 'config' (not 'configBuilder')
         return DockerClientImpl.getInstance(config, httpClient);
     }
+
+    /**
+     * Image pulls can run for minutes, so they are executed on a small
+     * dedicated thread pool instead of blocking HTTP request threads.
+     */
+    @Bean(destroyMethod = "shutdown")
+    public ExecutorService dockerPullExecutor() {
+        return Executors.newFixedThreadPool(3, this::newPullThread);
+    }
+
+    private Thread newPullThread(Runnable runnable) {
+        Thread thread = new Thread(runnable, "docker-pull-" + PULL_THREAD_COUNTER.incrementAndGet());
+        thread.setDaemon(true);
+        return thread;
+    }
+
+    private static final AtomicInteger PULL_THREAD_COUNTER = new AtomicInteger();
 }

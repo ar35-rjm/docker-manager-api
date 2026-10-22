@@ -28,6 +28,9 @@
 	</scm>
 	<properties>
 		<java.version>21</java.version>
+		<!-- JDK 23+ disables annotation processors found on the classpath
+		     by default; -proc:full keeps Lombok working on CLI builds. -->
+		<maven.compiler.proc>full</maven.compiler.proc>
 	</properties>
 	<dependencies>
 		<dependency>
